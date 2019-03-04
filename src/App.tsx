@@ -2,14 +2,14 @@ import React, { Component, useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
 import styled, { css } from 'styled-components';
 import './App.css';
-type Coordinate = {
+type Coordinates = {
 	row: number;
 	col: number;
 };
 
-type Direction = Coordinate;
+type Direction = Coordinates;
 
-type Cell = Coordinate;
+type Cell = Coordinates;
 
 type Body = Cell & {
 	hasFood: boolean;
@@ -59,7 +59,7 @@ const SnakeField = styled.div`
 `;
 
 const Cell = styled.div`
-	${(p: { cell: Coordinate }) => ``};
+	${(p: { cell: Coordinates }) => ``};
 	grid-column: ${p => p.cell.col};
 	grid-row: ${p => p.cell.row};
 	position: relative;
@@ -70,7 +70,7 @@ const Food = styled(Cell)`
 `;
 
 const Body = styled(Cell)`
-	${(p: { cell: Coordinate & Body }) => ``};
+	${(p: { cell: Coordinates & Body }) => ``};
 	background-color: red;
 	${p =>
 		p.cell.hasFood &&
@@ -118,21 +118,24 @@ const useInterval = (callback: Function, delay: number | null) => {
 
 const App = () => {
 	const size = 15;
-	const [mode, setMode] = useState<Mode>('Normal');
+	const fieldRef = useRef<HTMLDivElement>(null);
+	const [mode, setMode] = useState<Mode>('Infinite');
 	const [dead, setDead] = useState(false);
 	const [score, setScore] = useState(0);
-	const [level, setLevel] = useState(0);
+	const [foodAte, setFoodAte] = useState(0);
+	const [level, setLevel] = useState(1);
+
 	const [snake, setSnake] = useState(initialSnake);
 	const [dir, setDir] = useState<Direction | null>(null);
 	const [nextDir, setNextDir] = useState<Direction>(directions.LEFT);
 	const [delay, setDelay] = useState(250);
 	const [isRunning, setIsRunning] = useState(false);
-	const randCoord = (): Coordinate => ({
+	const randCoord = (): Coordinates => ({
 		row: _.random(1, size, false),
 		col: _.random(1, size, false)
 	});
 	const randFood = () => {
-		let newFood: Coordinate = snake[2];
+		let newFood: Coordinates;
 		do {
 			newFood = randCoord();
 		} while (
@@ -144,6 +147,7 @@ const App = () => {
 
 	const start = () => {
 		setIsRunning(true);
+		fieldRef.current!.focus();
 	};
 	const pause = () => {
 		setIsRunning(false);
@@ -155,6 +159,7 @@ const App = () => {
 		setDir(directions.LEFT);
 		setNextDir(directions.LEFT);
 		setFood(randFood());
+		setFoodAte(0);
 		setScore(0);
 	};
 
@@ -188,17 +193,15 @@ const App = () => {
 		};
 		if (willEatFood) {
 			setFood(randFood());
-			setScore(score + 1);
+			setScore(score + level);
+			setFoodAte(foodAte + 1);
 		}
 
-		const newBody = snake.reduce((cells: Body[], cell, index, { length }) => {
-			if (index !== length - 1) {
-				return [...cells, cell];
-			} else if (cell.hasFood) {
-				return [...cells, { ...cell, hasFood: false }];
-			}
-			return cells;
-		}, []);
+		// If will eat food, keep old snake as new body, a.k.a. add one unit length
+
+		const newBody = willEatFood
+			? snake
+			: snake.filter((cell, index, { length }) => index !== length - 1);
 
 		if (
 			newBody.some(body => newHead.col === body.col && newHead.row === body.row)
@@ -234,9 +237,10 @@ const App = () => {
 	useInterval(walk, isRunning ? delay : null);
 
 	useEffect(() => {
-		// Update level per 5 score
-		setLevel(Math.floor(score / 5) + 1);
-	}, [score]);
+		// Update level per 5 food
+		setLevel(Math.floor(foodAte / 5) + 1);
+		console.log('setlevel');
+	}, [foodAte]);
 
 	useEffect(() => {
 		// Update speed when level change
@@ -244,14 +248,20 @@ const App = () => {
 	}, [level]);
 
 	return (
-		<Container onKeyDown={e => changeDir(e.keyCode)} tabIndex={0}>
+		<Container>
 			<h2>{mode} Snake</h2>
 			<MetaBar>
 				<span>Level: {level}</span>
 				{dead && <span style={{ color: 'red' }}>You Died!</span>}
 				<span>Score: {score}</span>
 			</MetaBar>
-			<SnakeField size={size} mode={mode}>
+			<SnakeField
+				size={size}
+				mode={mode}
+				ref={fieldRef}
+				onKeyDown={e => changeDir(e.keyCode)}
+				tabIndex={0}
+			>
 				{snake.map((cell, index) => (
 					<Body key={index} cell={cell} />
 				))}
@@ -272,7 +282,6 @@ const App = () => {
 				<button onClick={start} disabled={isRunning || dead}>
 					Start
 				</button>
-				{/* <button onClick={pause}>Pause</button> */}
 				<button onClick={reset} disabled={!isRunning && !dead}>
 					Reset
 				</button>
