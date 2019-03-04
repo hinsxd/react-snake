@@ -55,7 +55,69 @@ const SnakeField = styled.div`
 	display: grid;
 	grid-template-columns: repeat(${p => p.size}, 1fr);
 	grid-template-rows: repeat(${p => p.size}, 1fr);
-	grid-gap: -1px;
+	&::after {
+		content: '';
+		width: 100%;
+		height: 100%;
+		background-color: #eee;
+		background-size: 60px 60px;
+		background-position: 0 0, 30px 30px;
+		background-image: -webkit-linear-gradient(
+				45deg,
+				black 25%,
+				transparent 25%,
+				transparent 75%,
+				black 75%,
+				black
+			),
+			-webkit-linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black
+						75%, black);
+		background-image: -moz-linear-gradient(
+				45deg,
+				black 25%,
+				transparent 25%,
+				transparent 75%,
+				black 75%,
+				black
+			),
+			-moz-linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black
+						75%, black);
+		background-image: linear-gradient(
+				45deg,
+				black 25%,
+				transparent 25%,
+				transparent 75%,
+				black 75%,
+				black
+			),
+			linear-gradient(
+				45deg,
+				black 25%,
+				transparent 25%,
+				transparent 75%,
+				black 75%,
+				black
+			);
+		-pie-background: linear-gradient(
+					45deg,
+					black 25%,
+					transparent 25%,
+					transparent 75%,
+					black 75%,
+					black
+				)
+				0 0 / 60px,
+			linear-gradient(
+					45deg,
+					black 25%,
+					transparent 25%,
+					transparent 75%,
+					black 75%,
+					black
+				)
+				30px 30px / 60px,
+			#eee;
+	}
 `;
 
 const Cell = styled.div`
@@ -117,7 +179,7 @@ const useInterval = (callback: Function, delay: number | null) => {
 };
 
 const App = () => {
-	const size = 15;
+	const size = 25;
 	const fieldRef = useRef<HTMLDivElement>(null);
 	const [mode, setMode] = useState<Mode>('Infinite');
 	const [dead, setDead] = useState(false);
@@ -244,7 +306,7 @@ const App = () => {
 
 	useEffect(() => {
 		// Update speed when level change
-		setDelay(Math.round(250 / level));
+		setDelay(Math.round(250 / (1 + level * 0.2)));
 	}, [level]);
 
 	return (
