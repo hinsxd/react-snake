@@ -55,69 +55,6 @@ const SnakeField = styled.div`
 	display: grid;
 	grid-template-columns: repeat(${p => p.size}, 1fr);
 	grid-template-rows: repeat(${p => p.size}, 1fr);
-	&::after {
-		content: '';
-		width: 100%;
-		height: 100%;
-		background-color: #eee;
-		background-size: 60px 60px;
-		background-position: 0 0, 30px 30px;
-		background-image: -webkit-linear-gradient(
-				45deg,
-				black 25%,
-				transparent 25%,
-				transparent 75%,
-				black 75%,
-				black
-			),
-			-webkit-linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black
-						75%, black);
-		background-image: -moz-linear-gradient(
-				45deg,
-				black 25%,
-				transparent 25%,
-				transparent 75%,
-				black 75%,
-				black
-			),
-			-moz-linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black
-						75%, black);
-		background-image: linear-gradient(
-				45deg,
-				black 25%,
-				transparent 25%,
-				transparent 75%,
-				black 75%,
-				black
-			),
-			linear-gradient(
-				45deg,
-				black 25%,
-				transparent 25%,
-				transparent 75%,
-				black 75%,
-				black
-			);
-		-pie-background: linear-gradient(
-					45deg,
-					black 25%,
-					transparent 25%,
-					transparent 75%,
-					black 75%,
-					black
-				)
-				0 0 / 60px,
-			linear-gradient(
-					45deg,
-					black 25%,
-					transparent 25%,
-					transparent 75%,
-					black 75%,
-					black
-				)
-				30px 30px / 60px,
-			#eee;
-	}
 `;
 
 const Cell = styled.div`
