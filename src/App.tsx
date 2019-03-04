@@ -1,6 +1,6 @@
 import React, { Component, useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import styled, { css } from 'styled-components';
+import styled, { css } from 'styled-components/macro';
 import './App.css';
 type Coordinates = {
 	row: number;
@@ -46,10 +46,15 @@ const ButtonBar = styled(Row)`
 		box-shadow: 0 0 5px #383838;
 	}
 `;
-const SnakeField = styled.div`
-	${(p: { size: number; mode: Mode }) => ``};
+const SnakeFieldWrapper = styled.div`
+	position: relative;
 	flex: 0 0 500px;
 	width: 500px;
+`;
+const SnakeField = styled.div`
+	${(p: { size: number; mode: Mode }) => ``};
+	height: 100%;
+	width: 100%;
 	border: 2px #444 ${p => (p.mode === 'Normal' ? 'solid' : 'dashed')};
 	box-shadow: 0 0 5px #666;
 	display: grid;
@@ -57,11 +62,25 @@ const SnakeField = styled.div`
 	grid-template-rows: repeat(${p => p.size}, 1fr);
 `;
 
+const Background = styled.div`
+	${(p: { size: number }) => ``};
+	z-index: -1;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(${p => p.size}, 1fr);
+	grid-template-rows: repeat(${p => p.size}, 1fr);
+`;
+const BackgroundCell = styled.div`
+	border: 1px solid #000;
+`;
 const Cell = styled.div`
 	${(p: { cell: Coordinates }) => ``};
 	grid-column: ${p => p.cell.col};
 	grid-row: ${p => p.cell.row};
-	position: relative;
 `;
 const Food = styled(Cell)`
 	background-color: blue;
@@ -114,7 +133,7 @@ const useInterval = (callback: Function, delay: number | null) => {
 		}
 	}, [delay]);
 };
-
+const BackgroundGrid = () => <></>;
 const App = () => {
 	const size = 25;
 	const fieldRef = useRef<HTMLDivElement>(null);
@@ -254,18 +273,24 @@ const App = () => {
 				{dead && <span style={{ color: 'red' }}>You Died!</span>}
 				<span>Score: {score}</span>
 			</MetaBar>
-			<SnakeField
-				size={size}
-				mode={mode}
-				ref={fieldRef}
-				onKeyDown={e => changeDir(e.keyCode)}
-				tabIndex={0}
-			>
-				{snake.map((cell, index) => (
-					<Body key={index} cell={cell} />
-				))}
-				<Food cell={food} />
-			</SnakeField>
+
+			<SnakeFieldWrapper>
+				<Background size={size}>
+					<BackgroundGrid />{' '}
+				</Background>
+				<SnakeField
+					size={size}
+					mode={mode}
+					ref={fieldRef}
+					onKeyDown={e => changeDir(e.keyCode)}
+					tabIndex={0}
+				>
+					{snake.map((cell, index) => (
+						<Body key={index} cell={cell} />
+					))}
+					<Food cell={food} />
+				</SnakeField>
+			</SnakeFieldWrapper>
 			<ButtonBar>
 				{mode == 'Normal' ? (
 					<button onClick={() => setMode('Infinite')} disabled={isRunning}>
